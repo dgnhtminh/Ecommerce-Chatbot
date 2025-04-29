@@ -1,0 +1,69 @@
+.add-coupon {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 800px;
+    padding: 30px 50px;
+    margin: 20px 30px;
+    border-radius: 6px;
+    background: white;
+}
+
+.addcoupon-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.addcoupon-itemfield {
+    width: 100%;
+    margin-bottom: 20px;
+    color: #7b7b7b;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.addcoupon-itemfield label {
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.addcoupon-itemfield input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 50px;
+    border-radius: 4px;
+    padding-left: 15px;
+    border: 1px solid #c3c3c3;
+    outline: none;
+    color: #7b7b7b;
+    font-family: 'Poppins';
+    font-size: 14px;
+}
+
+.addcoupon-btn {
+    margin-top: 20px;
+    width: 160px;
+    height: 50px;
+    border-radius: 6px;
+    background: #f06f05;
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.addcoupon-btn:hover {
+    background-color: #ce5e02;
+}
+
+@media (max-width: 800px) {
+    .add-coupon {
+        width: auto;
+        padding: 30px;
+        margin: 20px;
+    }
+}

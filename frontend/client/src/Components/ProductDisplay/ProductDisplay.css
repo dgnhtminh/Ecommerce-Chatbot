@@ -104,6 +104,35 @@
     font-weight: 600;
 }
 
+/* size */
+.product-size-box {
+    padding: 10px 15px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    background-color: #e0e0e0;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+    display: inline-block;
+    font-weight: 500;
+}
+
+.product-size-box:hover {
+    background-color: #d4d4d4;
+}
+
+.product-size-box.selected {
+    background-color: #4285f4;
+    color: white;
+}
+
+.error-message {
+    color: red;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
 @media(max-width:1280px){
     .productdisplay{
         margin: 0px 60px;

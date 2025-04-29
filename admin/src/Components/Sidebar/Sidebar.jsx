@@ -19,14 +19,19 @@ const Sidebar = () => {
             <p>Product List</p>
         </div>
       </Link>
-            <Link to={'/userproduct'} style={{textDecoration:"none"}}>
+            <Link to={'/listuser'} style={{textDecoration:"none"}}>
         <div className="sidebar-item">
             <p>Users List</p>
         </div>
       </Link>
-      <Link to={'/orderproduct'} style={{textDecoration:"none"}}>
+      <Link to={'/listorder'} style={{textDecoration:"none"}}>
         <div className="sidebar-item">
             <p>Orders List</p>
+        </div>
+      </Link>
+      <Link to={'/listcoupon'} style={{textDecoration:"none"}}>
+        <div className="sidebar-item">
+            <p>Coupons List</p>
         </div>
       </Link>
     </div>

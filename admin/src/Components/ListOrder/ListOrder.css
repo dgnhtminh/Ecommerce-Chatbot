@@ -1,0 +1,112 @@
+.list-order {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-height: 740px;
+    padding: 20px 40px;
+    margin: 30px auto;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.list-order h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.listorder-format-main {
+    display: grid;
+    grid-template-columns: 0.5fr 1fr 1.5fr 1.5fr 2.2fr 1fr 1fr 1.2fr 1.5fr 0.5fr;
+    gap: 10px;
+    width: 100%;
+    padding: 15px 0;
+    color: #454545;
+    font-size: 15px;
+    font-weight: 600;
+    border-bottom: 1px solid #eee;
+}
+
+.listorder-format {
+    display: grid;
+    grid-template-columns: 0.5fr 1fr 1.5fr 1.5fr 2.2fr 1fr 1fr 1.2fr 1.5fr 0.5fr;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    transition: background-color 0.2s ease;
+}
+
+.listorder-format:hover {
+    background-color: #f9f9f9;
+    border-radius: 6px;
+}
+
+.listorder-remove-icon {
+    cursor: pointer;
+    margin: auto;
+    height: 20px;
+    width: 20px;
+    transition: transform 0.2s ease;
+}
+
+.listorder-remove-icon:hover {
+    transform: scale(1.2);
+}
+
+.listorder-allorders {
+    width: 100%;
+    max-height: 580px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Optional: Scrollbar styling */
+.listorder-allorders::-webkit-scrollbar {
+    width: 6px;
+}
+.listorder-allorders::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+}
+
+.listorder-status-select {
+    padding: 4px 6px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    font-size: 13px;
+    cursor: pointer;
+    max-width: 100px;
+    text-transform: capitalize;
+}
+
+.listorder-status-select:focus {
+    outline: none;
+    border-color: #888;
+}
+
+@media (max-width: 800px) {
+    .list-order {
+        width: 95%;
+        padding: 10px 20px;
+        margin: 20px auto;
+        height: auto;
+    }
+
+    .listorder-format-main,
+    .listorder-format {
+        grid-template-columns: 0.5fr 1fr 1fr;
+        font-size: 12px;
+    }
+
+    .listorder-remove-icon {
+        height: 16px;
+        width: 16px;
+    }
+}

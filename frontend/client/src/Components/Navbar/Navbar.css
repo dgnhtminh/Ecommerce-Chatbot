@@ -81,9 +81,57 @@
     background: red;
     color: white;
 }
+
 .nav-dropdown{
     display: none;
 }
+
+/* --- Dropdown User --- */
+.nav-user-dropdown {
+    position: relative;
+    cursor: pointer;
+}
+
+.nav-user-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.nav-user-menu {
+    display: none;
+    position: absolute;
+    top: 45px;
+    right: 0;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    overflow: hidden;
+    z-index: 200;
+    min-width: 140px;
+}
+
+.nav-user-menu a,
+.nav-user-menu span {
+    display: block;
+    padding: 10px 15px;
+    font-size: 17px;
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.nav-user-menu a:hover,
+.nav-user-menu span:hover {
+    background-color: #f5f5f5;
+}
+
+.nav-user-dropdown:hover .nav-user-menu {
+    display: block;
+}
+
 @media(max-width:1280px) {
     .navbar {
         padding: 12px 50px;

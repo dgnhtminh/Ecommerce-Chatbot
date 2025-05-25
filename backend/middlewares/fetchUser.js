@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 
-//Creating middelware to fetch user
 const fetchUser = async(req,res,next)=>{
     const token = req.header('auth-token');
     if(!token){

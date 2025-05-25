@@ -8,7 +8,6 @@ const ShopContextProvider = (props) => {
     const [discount, setDiscount] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
-    // ✅ Fetch tất cả sản phẩm khi load lần đầu
     useEffect(() => {
         fetchInitialData();
     }, []);
@@ -19,7 +18,6 @@ const ShopContextProvider = (props) => {
             let allProducts = [];
             let totalPages = 1;
 
-            // Lặp để fetch toàn bộ sản phẩm (nếu có phân trang)
             do {
                 const res = await fetch(`http://localhost:4000/api/products/allproducts?page=${page}&limit=100`);
                 const data = await res.json();
@@ -30,7 +28,6 @@ const ShopContextProvider = (props) => {
 
             setAll_Product(allProducts);
 
-            // Fetch giỏ hàng nếu người dùng đã đăng nhập
             if (localStorage.getItem('auth-token')) {
                 const resCart = await fetch('http://localhost:4000/api/cart/getcart', {
                     method: 'POST',
@@ -61,7 +58,6 @@ const ShopContextProvider = (props) => {
     };
 
 
-    // ✅ NEW: Hàm fetch sản phẩm theo danh mục
     const fetchProductsByCategory = async (category) => {
         try {
             setIsLoading(true);

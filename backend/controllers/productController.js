@@ -100,7 +100,7 @@ const allProducts = async (req, res) => {
                     $regex: search,
                     $options: 'i'
                 }
-            } // tìm theo tên, không phân biệt hoa thường
+            } 
             :
             {};
 
@@ -149,7 +149,7 @@ const getProductsByCategory = async (req, res) => {
 
         const query = {
             category,
-            name: { $regex: search, $options: 'i' }  // tìm kiếm không phân biệt hoa thường
+            name: { $regex: search, $options: 'i' }  
         };
 
         const total = await Product.countDocuments(query);

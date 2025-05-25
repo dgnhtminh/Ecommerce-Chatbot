@@ -116,7 +116,6 @@ const updateOrderStatus = async (req, res) => {
     }
 }
 
-//lay ra order trang client
 const userOrders = async (req, res) => {
     console.log("User from token:", req.user);
     const userId = req.user.id; // từ token
@@ -126,7 +125,6 @@ const userOrders = async (req, res) => {
     res.json(orders);
 }
 
-// routes/order.js
 const cancelOrder = async (req, res) => {
     const { orderId } = req.body;
     try {

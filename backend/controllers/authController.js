@@ -88,16 +88,13 @@ const registerAdmin = async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
-        // Kiểm tra xem email đã tồn tại chưa
         const existingAdmin = await Admin.findOne({ email });
         if (existingAdmin) {
             return res.status(400).json({ message: 'Email already exists' });
         }
 
-        // Hash mật khẩu
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Tạo tài khoản admin mới
         const newAdmin = new Admin({
             name,
             email,

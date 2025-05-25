@@ -9,5 +9,6 @@ router.get('/userorders', fetchUser, orderController.userOrders);
 router.get('/allorders', orderController.allOrders);
 router.post('/updateorderstatus', orderController.updateOrderStatus);
 router.post('/removeorder', orderController.removeOrder);
+router.post('/cancelorder', fetchUser, orderController.cancelOrder)
 
 module.exports = router;

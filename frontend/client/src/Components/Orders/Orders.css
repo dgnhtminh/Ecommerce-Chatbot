@@ -81,6 +81,26 @@
     color: #16a085;
 }
 
+.order-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.cancel-btn {
+    padding: 6px 8px;
+    font-size: 0.9rem;
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.cancel-btn:hover {
+    background-color: #e04344;
+}
+
 @media (max-width: 768px) {
     .order-card {
         flex-direction: column;

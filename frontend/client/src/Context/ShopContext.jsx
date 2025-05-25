@@ -3,58 +3,105 @@ import React, { createContext, useEffect, useState } from "react";
 export const ShopContext = createContext(null);
 
 const ShopContextProvider = (props) => {
-
     const [all_product, setAll_Product] = useState([]);
-    const [cartItems, setCartItems] = useState({}); // changed to object like { "12_M": 1 }
+    const [cartItems, setCartItems] = useState({});
     const [discount, setDiscount] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
 
+    // ✅ Fetch tất cả sản phẩm khi load lần đầu
     useEffect(() => {
-        fetch('http://localhost:4000/api/products/allproducts')
-            .then((response) => response.json())
-            .then((data) => setAll_Product(data));
-
-        if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:4000/api/cart/getcart', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/form-data',
-                    'auth-token': `${localStorage.getItem('auth-token')}`,
-                    'Content-Type': 'application/json',
-                },
-                body: "",
-            })
-                .then((response) => response.json())
-                .then((data) => setCartItems(data));
-        }
+        fetchInitialData();
     }, []);
 
-    // ---------- ADD TO CART ----------
-    const addToCart = (productId, size) => {
+    const fetchInitialData = async () => {
+        try {
+            let page = 1;
+            let allProducts = [];
+            let totalPages = 1;
+
+            // Lặp để fetch toàn bộ sản phẩm (nếu có phân trang)
+            do {
+                const res = await fetch(`http://localhost:4000/api/products/allproducts?page=${page}&limit=100`);
+                const data = await res.json();
+                allProducts = [...allProducts, ...data.products];
+                totalPages = data.totalPages || 1;
+                page++;
+            } while (page <= totalPages);
+
+            setAll_Product(allProducts);
+
+            // Fetch giỏ hàng nếu người dùng đã đăng nhập
+            if (localStorage.getItem('auth-token')) {
+                const resCart = await fetch('http://localhost:4000/api/cart/getcart', {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'auth-token': `${localStorage.getItem('auth-token')}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: "",
+                });
+                const cartData = await resCart.json();
+
+                const filteredCart = {};
+                for (const key in cartData) {
+                    const [id] = key.split('_');
+                    if (allProducts.some(p => p.id === Number(id)) && cartData[key] > 0) {
+                        filteredCart[key] = cartData[key];
+                    }
+                }
+                setCartItems(filteredCart);
+            }
+
+            setIsLoading(false);
+        } catch (err) {
+            console.error('Lỗi khi fetch dữ liệu:', err);
+            setIsLoading(false);
+        }
+    };
+
+
+    // ✅ NEW: Hàm fetch sản phẩm theo danh mục
+    const fetchProductsByCategory = async (category) => {
+        try {
+            setIsLoading(true);
+            const res = await fetch(`http://localhost:4000/api/products/category/${category}`);
+            const data = await res.json();
+            setAll_Product(data);
+            setIsLoading(false);
+        } catch (err) {
+            console.error("Lỗi khi fetch sản phẩm theo category:", err);
+            setIsLoading(false);
+        }
+    };
+
+    const addToCart = (productId, size, quantity) => {
         const key = `${productId}_${size}`;
-        setCartItems((prev) => ({
+
+        setCartItems(prev => ({
             ...prev,
-            [key]: (prev[key] || 0) + 1
+            [key]: (prev[key] || 0) + quantity
         }));
 
         if (localStorage.getItem('auth-token')) {
             fetch('http://localhost:4000/api/cart/addtocart', {
                 method: 'POST',
                 headers: {
-                    Accept: 'application/form-data',
+                    Accept: 'application/json',
                     'auth-token': `${localStorage.getItem('auth-token')}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ itemId: key })
+                body: JSON.stringify({ itemId: key, quantity })  
             })
-                .then((response) => response.json())
-                .then((data) => console.log(data));
+                .then(res => res.json())
+                .then(data => console.log(data));
         }
     };
 
-    // ---------- REMOVE FROM CART ----------
+
     const removeFromCart = (productId, size) => {
         const key = `${productId}_${size}`;
-        setCartItems((prev) => {
+        setCartItems(prev => {
             const updated = { ...prev };
             if (updated[key]) {
                 updated[key]--;
@@ -67,22 +114,17 @@ const ShopContextProvider = (props) => {
             fetch('http://localhost:4000/api/cart/removefromcart', {
                 method: 'POST',
                 headers: {
-                    Accept: 'application/form-data',
+                    Accept: 'application/json',
                     'auth-token': `${localStorage.getItem('auth-token')}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ itemId: key })
-            })
-                .then((response) => response.json())
-                .then((data) => console.log(data));
+            }).then(res => res.json()).then(data => console.log(data));
         }
     };
 
-    // ---------- CLEAR CART ----------
     const clearCart = () => {
-        setCartItems({}); // clear ở phía client
-    
-        // Nếu đã đăng nhập thì xóa ở server
+        setCartItems({});
         if (localStorage.getItem('auth-token')) {
             fetch('http://localhost:4000/api/cart/clearcart', {
                 method: 'POST',
@@ -91,28 +133,23 @@ const ShopContextProvider = (props) => {
                     'auth-token': `${localStorage.getItem('auth-token')}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({}) // có thể không cần body
+                body: JSON.stringify({})
             })
-            .then((res) => res.json())
-            .then((data) => console.log('Cart cleared on server:', data))
-            .catch((err) => console.error('Error clearing cart on server:', err));
+                .then(res => res.json())
+                .then(data => console.log('Cart cleared on server:', data))
+                .catch(err => console.error('Error clearing cart on server:', err));
         }
     };
-    
 
-    // ---------- APPLY COUPON ----------
     const applyCoupon = async (code) => {
         try {
             const res = await fetch('http://localhost:4000/api/coupon/validate-coupon', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code }),
             });
 
             const data = await res.json();
-
             if (data.success) {
                 setDiscount(data.discount);
                 alert(`Áp dụng mã thành công: -${data.discount}%`);
@@ -126,22 +163,20 @@ const ShopContextProvider = (props) => {
         }
     };
 
-    // ---------- GET TOTAL AMOUNT ----------
     const getTotalCartAmount = () => {
-        let totalAmount = 0;
+        let total = 0;
         for (const key in cartItems) {
             const [id] = key.split('_');
             const product = all_product.find(p => p.id === Number(id));
             if (product) {
-                totalAmount += product.new_price * cartItems[key];
+                total += product.new_price * cartItems[key];
             }
         }
-        return Number(totalAmount.toFixed(2));
+        return Number(total.toFixed(2));
     };
 
-    // ---------- GET TOTAL ITEMS ----------
     const getTotalCartItems = () => {
-        return Object.values(cartItems).reduce((acc, quantity) => acc + quantity, 0);
+        return Object.keys(cartItems).length;
     };
 
     const contextValue = {
@@ -154,7 +189,9 @@ const ShopContextProvider = (props) => {
         discount,
         setDiscount,
         applyCoupon,
-        clearCart
+        clearCart,
+        isLoading,
+        fetchProductsByCategory // ✅ thêm hàm này vào context
     };
 
     return (

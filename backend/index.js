@@ -14,6 +14,7 @@ const authRoutes = require('./routes/authRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const couponRoutes = require('./routes/couponRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 app.use(express.json());
 app.use(cors());
@@ -52,6 +53,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/coupon', couponRoutes);
 app.use('/api/order', orderRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.listen(port, (error)=>{
     if(!error){

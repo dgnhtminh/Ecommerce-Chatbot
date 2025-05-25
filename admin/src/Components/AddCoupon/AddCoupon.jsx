@@ -49,9 +49,21 @@ const AddCoupon = () => {
             <div className="addcoupon-itemfield">
                 <label>Discount (%)</label>
                 <input
-                    type="number"
+                    type="text"
                     value={discount}
-                    onChange={(e) => setDiscount(e.target.value)}
+                    onChange={(e) => {
+                        const value = e.target.value;
+
+                        // Chỉ cho phép số nguyên dương từ 1 đến 100
+                        if (/^\d{0,3}$/.test(value)) {
+                            const numericValue = Number(value);
+                            if (numericValue >= 1 && numericValue <= 100) {
+                                setDiscount(value);
+                            } else if (value === "") {
+                                setDiscount("");
+                            }
+                        }
+                    }}
                     placeholder="Enter discount"
                 />
             </div>

@@ -3,9 +3,9 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-height: 740px;
+    max-height: 1000px;
     padding: 20px 40px;
-    margin: 30px auto;
+    margin: 0px auto;
     border-radius: 8px;
     background: white;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
@@ -26,7 +26,6 @@
     color: #454545;
     font-size: 15px;
     font-weight: 600;
-    border-bottom: 1px solid #eee;
 }
 
 .listorder-format {
@@ -89,6 +88,54 @@
 .listorder-status-select:focus {
     outline: none;
     border-color: #888;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 8px;
+  font-size: 16px;
+}
+
+.pagination-container button {
+  border: none;
+  background-color: #f5f5f5;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.2s ease;
+}
+
+.pagination-container button:hover {
+  background-color: #ddd;
+}
+
+.pagination-container button.active {
+  background-color: #f44;
+  color: white;
+  font-weight: bold;
+}
+
+.pagination-container button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-container span {
+  padding: 8px;
+  color: #aaa;
+}
+
+.listorder-search {
+  width: 300px;
+  padding: 8px 12px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
 }
 
 @media (max-width: 800px) {

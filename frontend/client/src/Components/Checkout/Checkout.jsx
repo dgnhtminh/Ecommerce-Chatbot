@@ -25,12 +25,21 @@ const Checkout = () => {
     });
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+
+        if (name === 'phone') {
+            // Chỉ cho phép nhập số (không cho phép chữ và số âm)
+            const numericValue = value.replace(/\D/g, ''); // Loại bỏ mọi ký tự không phải số
+            setFormData({ ...formData, [name]: numericValue });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
     };
+
 
     const handleOrder = async (e) => {
         e.preventDefault();
-    
+
         const orderData = {
             shippingInfo: {
                 fullName: formData.name,
@@ -44,7 +53,7 @@ const Checkout = () => {
             totalAmount: subtotal,
             finalAmount: total,
         };
-    
+
         try {
             const res = await fetch('http://localhost:4000/api/order/placeorder', {
                 method: 'POST',
@@ -54,7 +63,7 @@ const Checkout = () => {
                 },
                 body: JSON.stringify(orderData),
             });
-    
+
             const data = await res.json();
             if (data.success) {
                 clearCart();
@@ -67,7 +76,7 @@ const Checkout = () => {
             alert('Đã xảy ra lỗi khi đặt hàng!');
         }
     };
-    
+
 
     return (
         <form className="checkout" onSubmit={handleOrder}>
@@ -120,9 +129,11 @@ const Checkout = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
+                    inputMode="numeric" // Gợi ý bàn phím số trên mobile
+                    pattern="[0-9]*"    // Đảm bảo chỉ nhập số khi submit
                 />
             </div>
-
+            
             <div className="checkout-right">
                 <h2>Order Summary</h2>
                 <div className="checkout-summary-item">

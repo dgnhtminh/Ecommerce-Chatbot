@@ -40,6 +40,7 @@ const Navbar = () => {
             <div className="nav-user-dropdown">
               <img src={user_icon} alt="user" className="nav-user-icon" />
               <div className="nav-user-menu">
+                <Link to="/profile">Your Profile</Link>
                 <Link to="/order">Your Orders</Link>
                 <span onClick={() => {
                   localStorage.removeItem('auth-token');

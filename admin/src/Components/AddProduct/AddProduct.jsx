@@ -17,12 +17,31 @@ const AddProduct = () => {
     });
 
     const imageHandler = (e) => {
-        setImage(e.target.files[0]);
+        const file = e.target.files[0];
+
+        if (file && file.type.startsWith('image/')) {
+            setImage(file);
+        } else {
+            alert('Chỉ được chọn file ảnh!');
+            setImage(false);
+        }
     };
 
+
     const changeHandler = (e) => {
-        setProductDetails({ ...productDetails, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+
+        // Nếu đang nhập old_price hoặc new_price thì kiểm tra số
+        if (name === 'old_price' || name === 'new_price') {
+            // Chỉ cho phép số dương
+            if (value === '' || (/^\d+(\.\d{0,2})?$/.test(value) && Number(value) > 0)) {
+                setProductDetails({ ...productDetails, [name]: value });
+            }
+        } else {
+            setProductDetails({ ...productDetails, [name]: value });
+        }
     };
+
 
     const toggleSize = (size) => {
         if (selectedSizes.includes(size)) {
@@ -70,6 +89,7 @@ const AddProduct = () => {
 
     return (
         <div className='add-product'>
+            <h2 className="addproduct-title">Add New Product</h2>
             <div className="addproduct-itemfield">
                 <p>Product title</p>
                 <input value={productDetails.name} onChange={changeHandler} type="text" name='name' placeholder='Type here' />
@@ -119,7 +139,7 @@ const AddProduct = () => {
                 <label htmlFor="file-input">
                     <img src={image ? URL.createObjectURL(image) : upload_area} className='addproduct-thumbnail-img' alt="" />
                 </label>
-                <input onChange={imageHandler} type="file" name='image' id='file-input' hidden />
+                <input onChange={imageHandler} type="file" name='image' id='file-input' accept="image/*"  hidden />
             </div>
 
             <button onClick={Add_Product} className='addproduct-btn'>ADD</button>

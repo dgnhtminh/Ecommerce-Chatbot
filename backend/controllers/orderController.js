@@ -3,29 +3,35 @@ const Users = require('../models/User');
 
 const allOrders = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 5;
-        const skip = (page - 1) * limit;
+        const { page = 1, limit = 5, search = '' } = req.query;
 
-        const totalOrders = await Orders.countDocuments();
+        const query = search
+            ? {
+                $or: [
+                    { 'shippingInfo.fullName': { $regex: search, $options: 'i' } },
+                    { 'shippingInfo.email': { $regex: search, $options: 'i' } }
+                ]
+              }
+            : {};
 
-        const orders = await Orders.find({})
-            .skip(skip)
-            .limit(limit);
+        const total = await Orders.countDocuments(query);
+        const orders = await Orders.find(query)
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(Number(limit));
 
-        console.log("Orders Fetched with Pagination");
-
-        res.send({
-            totalOrders,          // tổng số đơn
-            totalPages: Math.ceil(totalOrders / limit),  // tổng số trang
-            currentPage: page,     // trang hiện tại
-            orders,                // danh sách đơn hàng
+        res.json({
+            orders,
+            currentPage: Number(page),
+            totalPages: Math.ceil(total / limit),
         });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({ message: 'Server Error' });
+    } catch (err) {
+        console.error("Error in allOrders:", err);
+        res.status(500).json({ message: "Server Error" });
     }
-}
+};
+
+
 
 const removeOrder = async (req, res) => {
     await Orders.findByIdAndDelete(req.body.id);
@@ -120,10 +126,32 @@ const userOrders = async (req, res) => {
     res.json(orders);
 }
 
+// routes/order.js
+const cancelOrder = async (req, res) => {
+    const { orderId } = req.body;
+    try {
+        const order = await Orders.findOne({ _id: orderId, userId: req.user.id });
+        if (!order) return res.status(404).send("Order not found");
+
+        if (order.status !== "processing") {
+            return res.status(400).send("Only processing orders can be cancelled");
+        }
+
+        order.status = "cancelled";
+        await order.save();
+
+        res.send("Order cancelled successfully");
+    } catch (err) {
+        res.status(500).send("Server error");
+    }
+};
+
+
 module.exports = {
     placeOrder,
     allOrders,
     updateOrderStatus,
     userOrders,
-    removeOrder
+    removeOrder,
+    cancelOrder
 };

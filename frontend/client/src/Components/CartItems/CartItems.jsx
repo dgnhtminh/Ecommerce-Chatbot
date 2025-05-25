@@ -11,10 +11,12 @@ const CartItems = () => {
         cartItems,
         removeFromCart,
         applyCoupon,
-        discount
+        discount,
+        isLoading, 
     } = useContext(ShopContext);
 
     const [promoInput, setPromoInput] = useState('');
+    const navigate = useNavigate();
 
     const handleApplyCoupon = () => {
         if (promoInput.trim() === '') {
@@ -24,13 +26,27 @@ const CartItems = () => {
         applyCoupon(promoInput);
     };
 
-    //Nut thanh toan
-    const navigate = useNavigate();
-
     const handleCheckout = () => {
         const totalAmount = (getTotalCartAmount() * (1 - discount / 100)).toFixed(2);
         navigate('/checkout', { state: { total: totalAmount } });
     };
+
+    // 🔹 Nếu đang loading dữ liệu, hiển thị trạng thái loading
+    if (isLoading) {
+        return <div className="cartitems"><p>Loading cart...</p></div>;
+    }
+
+    // 🔹 Lọc ra các mục giỏ hàng hợp lệ
+    // const validCartEntries = Object.entries(cartItems).filter(([key, quantity]) => {
+    //     const [id] = key.split('_');
+    //     return quantity > 0 && all_product.some(p => p.id === Number(id));
+    // });
+
+    const validCartEntries = Object.entries(cartItems).filter(([key, quantity]) => quantity > 0);
+
+    if (validCartEntries.length === 0) {
+        return <div className="cartitems"><p>Your shopping cart is empty.</p></div>;
+    }
 
     return (
         <div className='cartitems'>
@@ -44,10 +60,7 @@ const CartItems = () => {
             </div>
             <hr />
 
-            {/* Lặp qua cartItems theo key: id_size */}
-            {Object.entries(cartItems).map(([key, quantity]) => {
-                if (quantity <= 0) return null;
-
+            {validCartEntries.map(([key, quantity]) => {
                 const [id, size] = key.split('_');
                 const product = all_product.find(p => p.id === Number(id));
                 if (!product) return null;
@@ -62,12 +75,12 @@ const CartItems = () => {
                             </p>
                             <p>${product.new_price}</p>
                             <button className='cartitems-quantity'>{quantity}</button>
-                            <p>${product.new_price * quantity}</p>
+                            <p>${(product.new_price * quantity).toFixed(2)}</p>
                             <img
                                 className='cartitems-remove-icon'
                                 src={remove_icon}
                                 onClick={() => removeFromCart(product.id, size)}
-                                alt=""
+                                alt="Remove"
                             />
                         </div>
                         <hr />
@@ -92,7 +105,6 @@ const CartItems = () => {
                                 </div>
                             </>
                         )}
-
                         <hr />
                         <div className='cartitems-total-item'>
                             <p>Shipping Fee</p>

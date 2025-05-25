@@ -2,27 +2,26 @@ const Users = require('../models/User');
 
 const addToCart = async (req, res) => {
     const itemId = req.body.itemId;
-    console.log("Added", itemId);
+    const quantity = parseInt(req.body.quantity) || 1; // mặc định là 1 nếu không có
 
-    let userData = await Users.findOne({
-        _id: req.user.id
-    });
+    console.log(`Added ${quantity} of ${itemId}`);
 
-    // Nếu chưa có key thì tạo key mới
+    let userData = await Users.findOne({ _id: req.user.id });
+
+    // Nếu chưa có key thì tạo key mới với số lượng
     if (!userData.cartData[itemId]) {
-        userData.cartData[itemId] = 1;
+        userData.cartData[itemId] = quantity;
     } else {
-        userData.cartData[itemId] += 1;
+        userData.cartData[itemId] += quantity;
     }
 
-    await Users.findOneAndUpdate({
-        _id: req.user.id
-    }, {
-        cartData: userData.cartData
-    });
+    await Users.findOneAndUpdate(
+        { _id: req.user.id },
+        { cartData: userData.cartData }
+    );
 
     res.send("Added");
-}
+};
 
 const removeFromCart = async (req, res) => {
     const itemId = req.body.itemId;

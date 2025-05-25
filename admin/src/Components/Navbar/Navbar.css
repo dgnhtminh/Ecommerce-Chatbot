@@ -7,12 +7,44 @@
     margin-bottom: 1px;
     background: white;
 }
+
 .nav-logo{
     width: 200px;
 }
+
 .nav-profile{
     width: 50px;
 }
+
+.nav-profile-container {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.nav-dropdown {
+  position: absolute;
+  right: 0;
+  top: 50px;
+  background-color: white;
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
+  padding: 10px;
+  border-radius: 6px;
+  z-index: 10;
+}
+
+.nav-dropdown button {
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.nav-dropdown button:hover {
+  color: red;
+}
+
 @media(max-width:800px){
     .navbar{
         padding: 15px 30px;

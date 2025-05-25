@@ -5,14 +5,20 @@ import cross_icon from '../../assets/cross_icon.png';
 const ListOrder = () => {
     const [allOrders, setAllOrders] = useState([]);
     const [productsMap, setProductsMap] = useState({});
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [searchTerm, setSearchTerm] = useState('');
+    const limit = 5;
 
     const statusOptions = ['processing', 'shipped', 'delivered', 'cancelled'];
 
-    const fetchOrders = async () => {
+    const fetchOrders = async (page = 1, search = '') => {
         try {
-            const res = await fetch('http://localhost:4000/api/order/allorders');
+            const res = await fetch(`http://localhost:4000/api/order/allorders?page=${page}&limit=${limit}&search=${search}`);
             const data = await res.json();
-            setAllOrders(data);
+            setAllOrders(data.orders);
+            setCurrentPage(data.currentPage);
+            setTotalPages(data.totalPages);
         } catch (err) {
             console.error('Error fetching orders:', err);
         }
@@ -20,10 +26,20 @@ const ListOrder = () => {
 
     const fetchProducts = async () => {
         try {
-            const res = await fetch('http://localhost:4000/api/products/allproducts');
-            const data = await res.json();
+            let page = 1;
+            let allProducts = [];
+            let totalPages = 1;
+
+            do {
+                const res = await fetch(`http://localhost:4000/api/products/allproducts?page=${page}&limit=100`);
+                const data = await res.json();
+                allProducts = [...allProducts, ...data.products];
+                totalPages = data.totalPages;
+                page++;
+            } while (page <= totalPages);
+
             const map = {};
-            data.forEach(product => {
+            allProducts.forEach(product => {
                 map[product.id] = product.name;
             });
             setProductsMap(map);
@@ -33,9 +49,20 @@ const ListOrder = () => {
     };
 
     useEffect(() => {
-        fetchOrders();
+        fetchOrders(currentPage, searchTerm);
         fetchProducts();
-    }, []);
+    }, [currentPage, searchTerm]);
+
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1); // Reset về trang đầu
+    };
+
+    const goToPage = (page) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
+    };
 
     const remove_order = async (id) => {
         try {
@@ -84,6 +111,15 @@ const ListOrder = () => {
     return (
         <div className='list-order'>
             <h1>All Orders</h1>
+
+            <input
+                type="text"
+                placeholder="Search by user..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="listorder-search"
+            />
+
             <div
                 className="listorder-format-main"
             >
@@ -134,6 +170,35 @@ const ListOrder = () => {
                         <hr />
                     </div>
                 ))}
+            </div>
+
+            <div className="pagination-container">
+                <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
+                    &lt;
+                </button>
+
+                {Array.from({ length: totalPages }).map((_, i) => {
+                    const page = i + 1;
+                    if (page === 1 || page === totalPages || Math.abs(page - currentPage) <= 2) {
+                        return (
+                            <button
+                                key={page}
+                                className={currentPage === page ? 'active' : ''}
+                                onClick={() => goToPage(page)}
+                            >
+                                {page}
+                            </button>
+                        );
+                    } else if (page === currentPage - 3 || page === currentPage + 3) {
+                        return <span key={page}>...</span>;
+                    } else {
+                        return null;
+                    }
+                })}
+
+                <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>
+                    &gt;
+                </button>
             </div>
         </div>
     );

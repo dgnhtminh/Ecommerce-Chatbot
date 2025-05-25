@@ -7,11 +7,12 @@ import Product from './Pages/Product';
 import LoginSignup from './Pages/LoginSignup';
 import Cart from './Pages/Cart';
 import Footer from './Components/Footer/Footer';
-import men_banner from './Components/Assets/banner_mens.png'
-import women_banner from './Components/Assets/banner_women.png'
-import kid_banner from './Components/Assets/banner_kids.png'
+import men_banner from './Components/Assets/banner_mens.png';
+import women_banner from './Components/Assets/banner_women.png';
+import kid_banner from './Components/Assets/banner_kids.png';
 import Checkout from './Components/Checkout/Checkout';
 import Orders from './Components/Orders/Orders';
+import MyProfile from './Components/MyProfile/MyProfile';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
         <Route path='/signup' element={<LoginSignup/>}/>
         <Route path='/checkout' element={<Checkout/>}/>
         <Route path='/order' element={<Orders/>}/>
+        <Route path='/profile' element={<MyProfile/>}/>
       </Routes>
       <Footer/>
       </BrowserRouter>

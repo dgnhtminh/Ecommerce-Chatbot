@@ -13,6 +13,7 @@ const ProductDisplay = (props) => {
     const { addToCart } = useContext(ShopContext);
 
     const [selectedSize, setSelectedSize] = useState("");
+    const [quantity, setQuantity] = useState(1);
     const [error, setError] = useState("");
 
     const handleAddToCart = () => {
@@ -21,7 +22,7 @@ const ProductDisplay = (props) => {
             return;
         }
         setError("");
-        addToCart(product.id, selectedSize);  // nếu bạn muốn gửi size theo thì sửa ShopContext theo
+        addToCart(product.id, selectedSize, quantity); 
     };
 
     return (
@@ -46,7 +47,6 @@ const ProductDisplay = (props) => {
                     <img src={star_icon} alt="" />
                     <img src={star_icon} alt="" />
                     <img src={star_dull_icon} alt="" />
-                    {/* <p>(122)</p> */}
                 </div>
 
                 <div className="productdisplay-right-prices">
@@ -59,7 +59,7 @@ const ProductDisplay = (props) => {
                 </div>
 
                 <div className="productdisplay-right-size">
-                    <h1>Select Size</h1>
+                    <h1>Select Size:</h1>
                     <div className="productdisplay-right-sizes">
                         {product.sizes && product.sizes.map((size) => (
                             <div
@@ -74,7 +74,20 @@ const ProductDisplay = (props) => {
                     {error && <p className="error-message">{error}</p>}
                 </div>
 
-                <button onClick={handleAddToCart}>ADD TO CART</button>
+                <div className="productdisplay-quantity">
+                    <h1>Quantity:</h1>
+                    <div className="quantity-controls">
+                        <button onClick={() => setQuantity(prev => Math.max(1, prev - 1))}>−</button>
+                        <input
+                            type="text"
+                            value={quantity}
+                            readOnly
+                        />
+                        <button onClick={() => setQuantity(prev => prev + 1)}>+</button>
+                    </div>
+                </div>
+
+                <button className="add-to-cart-btn" onClick={handleAddToCart}>ADD TO CART</button>
 
                 <p className='productdisplay-right-category'><span>Category: </span>{product.category}</p>
                 <p className='productdisplay-right-category'><span>Tags: </span>Modern, Latest</p>

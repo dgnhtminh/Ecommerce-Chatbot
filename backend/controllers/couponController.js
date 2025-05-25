@@ -38,29 +38,30 @@ const validateCoupon = async (req, res) => {
 
 const allCoupons = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 5;
-        const skip = (page - 1) * limit;
+        const { page = 1, limit = 5, search = '' } = req.query;
 
-        const totalCoupons = await Coupon.countDocuments();
+        const query = search
+            ? {
+                  code: { $regex: search, $options: 'i' }
+              }
+            : {};
 
-        const coupons = await Coupon.find({})
-            .skip(skip)
-            .limit(limit);
+        const total = await Coupon.countDocuments(query);
+        const coupons = await Coupon.find(query)
+            .skip((page - 1) * limit)
+            .limit(Number(limit));
 
-        console.log("Coupons Fetched with Pagination");
-
-        res.send({
-            totalCoupons,
-            totalPages: Math.ceil(totalCoupons / limit),
-            currentPage: page,
+        res.json({
             coupons,
+            currentPage: Number(page),
+            totalPages: Math.ceil(total / limit),
         });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({ message: 'Server Error' });
+    } catch (err) {
+        console.error("Error in allCoupons:", err);
+        res.status(500).json({ message: "Server Error" });
     }
-}
+};
+
 
 
 const addCoupon = async (req, res) => {

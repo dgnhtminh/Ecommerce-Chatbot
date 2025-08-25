@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './AddProduct.css'
 import upload_area from '../../assets/upload_area.svg'
 
 const AddProduct = () => {
+    const navigate = useNavigate();
     const [image, setImage] = useState(false);
     const [selectedSizes, setSelectedSizes] = useState([]);
     const availableSizes = ["S", "M", "L", "XL", "XXL"];
@@ -82,7 +84,12 @@ const AddProduct = () => {
                 },
                 body: JSON.stringify(product),
             }).then((resp) => resp.json()).then((data) => {
-                data.success ? alert("Product Added") : alert("Failed")
+                if(data.success) {
+                    alert("Product Added")
+                    navigate('/listproduct');
+                } else{
+                    alert("Failed")
+                }
             });
         }
     };

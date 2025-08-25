@@ -187,7 +187,7 @@ const ShopContextProvider = (props) => {
         applyCoupon,
         clearCart,
         isLoading,
-        fetchProductsByCategory // ✅ thêm hàm này vào context
+        fetchProductsByCategory 
     };
 
     return (

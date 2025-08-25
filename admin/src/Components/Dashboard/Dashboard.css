@@ -1,29 +1,32 @@
 /* Các class như cũ */
 .dashboard {
-  padding: 40px;
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .dashboard h1 {
-  font-size: 2.2rem;
+  font-size: 2rem;
   margin-bottom: 30px;
   text-align: center;
   color: #333;
 }
 
 .dashboard-cards {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 30px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
 }
 
 .dashboard-card {
+  flex: 1;
+  min-width: 220px;
   background: linear-gradient(to right, #ffffff, #f8f8f8);
   border-radius: 16px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  padding: 30px;
+  padding: 0px;
   text-align: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -50,7 +53,7 @@
 
 .dashboard-card.revenue h2 {
   color: #ffffff;
-  font-size: 3rem;
+  font-size: 2.5rem;
 }
 
 .dashboard-card.revenue p {
@@ -59,10 +62,17 @@
   color: #e8fce8;
 }
 
+.dashboard-chart {
+  margin-top: 40px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .dashboard-cards {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 }

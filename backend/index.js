@@ -15,6 +15,7 @@ const cartRoutes = require('./routes/cartRoutes');
 const couponRoutes = require('./routes/couponRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const chatbotRoutes = require('./routes/chatbotRoutes');
 
 app.use(express.json());
 app.use(cors());
@@ -54,6 +55,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/coupon', couponRoutes);
 app.use('/api/order', orderRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use("/api/chatbot", chatbotRoutes);
 
 app.listen(port, (error)=>{
     if(!error){

@@ -9,6 +9,7 @@ const Offers = () => {
         <h1>Exclusive</h1>
         <h1>Offers For You</h1>
         <p>ALL PRODUCTS OF US</p>
+        <button>Check Now</button>
       </div>
       <div className="offers-right">
         <img src={exclusive_image} alt="" />

@@ -53,7 +53,7 @@ const ListProduct = () => {
   };
 
   const edit_product = (id) => {
-    window.location.href = `/editproduct/${id}`;
+    navigate(`/editproduct/${id}`);
   };
 
   const goToPage = (page) => {

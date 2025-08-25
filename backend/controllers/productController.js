@@ -64,8 +64,10 @@ const updateProduct = async (req, res) => {
         } = req.params;
         const updateFields = req.body;
 
-        const updatedProduct = await Product.findByIdAndUpdate(id, updateFields, {
-            new: true
+        const updatedProduct = await Product.findOneAndUpdate({
+            id: parseInt(id)
+        }, updateFields, {
+            new: true,
         });
 
         if (!updatedProduct) {
@@ -94,14 +96,12 @@ const allProducts = async (req, res) => {
             page = 1, limit = 5, search = ''
         } = req.query;
 
-        const query = search ?
-            {
+        const query = search ? {
                 name: {
                     $regex: search,
                     $options: 'i'
                 }
-            } 
-            :
+            } :
             {};
 
         const total = await Product.countDocuments(query);
@@ -149,7 +149,10 @@ const getProductsByCategory = async (req, res) => {
 
         const query = {
             category,
-            name: { $regex: search, $options: 'i' }  
+            name: {
+                $regex: search,
+                $options: 'i'
+            }
         };
 
         const total = await Product.countDocuments(query);
@@ -174,6 +177,41 @@ const getProductsByCategory = async (req, res) => {
     }
 };
 
+const checkStock = async (req, res) => {
+    try {
+        const product = await Product.findOne({
+            id: parseInt(req.params.id)
+        });
+
+        if (!product) {
+            return res.status(404).json({
+                message: "Product not found"
+            });
+        }
+
+        if (product.available) {
+            res.json({
+                id: product.id,
+                name: product.name,
+                available: product.available,
+                message: `${product.name} hiện đang còn hàng`
+            });
+        } else {
+            res.json({
+                id: product.id,
+                name: product.name,
+                available: product.available,
+                message: `${product.name} hiện đã hết hàng`
+            });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            message: "Server error"
+        });
+    }
+};
+
 
 module.exports = {
     addProduct,
@@ -183,5 +221,6 @@ module.exports = {
     allProducts,
     newcollections,
     popularinwomen,
-    getProductsByCategory
+    getProductsByCategory,
+    checkStock
 };

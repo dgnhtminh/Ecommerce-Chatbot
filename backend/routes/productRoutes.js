@@ -10,6 +10,7 @@ router.get('/allproducts', productController.allProducts);
 router.get('/newcollections', productController.newcollections);
 router.get('/popularinwomen', productController.popularinwomen);
 router.get('/category/:category', productController.getProductsByCategory);
+router.get('/checkstock/:id', productController.checkStock);
 
 
 module.exports = router;

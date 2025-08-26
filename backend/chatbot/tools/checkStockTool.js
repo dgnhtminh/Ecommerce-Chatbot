@@ -14,7 +14,7 @@ async function checkStockTool({ input }) {
     // Embedding query
     const queryEmbedding = await embedding.encode(queryText);
 
-    // Tìm sản phẩm
+    // Tìm ID sản phẩm
     const productId = await vectorDB.searchProduct("products", queryEmbedding, 1);
     console.log("Product ID: " + productId)
     if (!productId) {

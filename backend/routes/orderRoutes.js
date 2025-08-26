@@ -10,5 +10,6 @@ router.get('/allorders', orderController.allOrders);
 router.post('/updateorderstatus', orderController.updateOrderStatus);
 router.post('/removeorder', orderController.removeOrder);
 router.post('/cancelorder', fetchUser, orderController.cancelOrder)
+router.get('/userordersbydate', fetchUser, orderController.userOrdersByDate);
 
 module.exports = router;

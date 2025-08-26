@@ -144,6 +144,63 @@ const cancelOrder = async (req, res) => {
     }
 };
 
+const userOrdersByDate = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const date = req.query.date;
+
+        if (!date) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Vui lòng cung cấp ngày (YYYY-MM-DD)" 
+            });
+        }
+
+        // Validate date format
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!dateRegex.test(date)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Định dạng ngày không hợp lệ. Vui lòng sử dụng YYYY-MM-DD" 
+            });
+        }
+
+        // Parse date an toàn hơn - explicit local timezone
+        const [year, month, day] = date.split('-').map(Number);
+        
+        const startDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+        const endDate = new Date(year, month - 1, day, 23, 59, 59, 999);
+
+        console.log(`Searching orders for userId: ${userId}, date range: ${startDate} - ${endDate}`);
+
+        // Tìm orders theo user và ngày
+        const orders = await Orders.find({
+            userId,
+            createdAt: { $gte: startDate, $lte: endDate }
+        });
+
+        console.log(`Found ${orders.length} orders`);
+
+        if (!orders || orders.length === 0) {
+            return res.json({ 
+                success: true, 
+                message: "Không tìm thấy đơn hàng nào trong ngày này.", 
+                orders: [] 
+            });
+        }
+
+        res.json({ success: true, orders });
+        
+    } catch (err) {
+        console.error("Lỗi userOrdersByDate:", err);
+        res.status(500).json({ 
+            success: false, 
+            message: "Đã xảy ra lỗi server",
+            error: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
+    }
+};
+
 
 module.exports = {
     placeOrder,
@@ -151,5 +208,6 @@ module.exports = {
     updateOrderStatus,
     userOrders,
     removeOrder,
-    cancelOrder
+    cancelOrder,
+    userOrdersByDate
 };

@@ -1,7 +1,7 @@
 // routes/chatbotRoutes.js
 const express = require("express");
 const router = express.Router();
-const { handleUserQuery } = require("../chatbot/RAG"); // import từ file chatbot.js
+const { handleUserQuery } = require("../chatbot/RAG_Agents"); 
 
 // POST /api/chatbot
 router.post("/", async (req, res) => {

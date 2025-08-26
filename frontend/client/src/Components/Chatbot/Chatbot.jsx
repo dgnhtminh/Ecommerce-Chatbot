@@ -28,9 +28,20 @@ function Chatbot() {
     setLoading(true);
 
     try {
+      // Lấy token từ localStorage
+      const token = localStorage.getItem("auth-token");
+      if (!token) {
+        setMessages(prev => [...prev, { role: "assistant", text: "⚠️ Bạn chưa đăng nhập" }]);
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch("http://localhost:4000/api/chatbot", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "auth-token": token
+        },
         body: JSON.stringify({
           query: input,
           history: updatedMessages.map(m => ({ role: m.role, content: m.text }))

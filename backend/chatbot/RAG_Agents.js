@@ -6,6 +6,8 @@ const { initializeAgentExecutorWithOptions } = require("langchain/agents");
 const { ChatOpenAI } = require("@langchain/openai");
 const { DynamicTool } = require("@langchain/core/tools");
 const checkStockTool = require("./tools/checkStockTool.js");
+const addToCartTool = require("./tools/addToCartTool.js");
+const checkOrdersTool  = require("./tools/checkOrdersTool.js");
 
 const systemPrompt = `Bạn là một nhân viên tư vấn bán quần áo chuyên nghiệp tại cửa hàng Fashion.
 Xưng em và xưng khách hàng là anh/chị. Nhiệm vụ của bạn là trả lời câu hỏi của khách hàng một cách rõ ràng, thân thiện và dựa hoàn vào các thông tin sản phẩm được cung cấp bên dưới.
@@ -80,7 +82,7 @@ async function askQuestion(query, messages = []) {
 }
 
 // ------------------ AGENT ------------------
-async function runAgent(query, messages = []) {
+async function runAgent(query) {
   const llm = new ChatOpenAI({
     modelName: "gpt-4o-mini",
     temperature: 0,
@@ -120,6 +122,59 @@ async function runAgent(query, messages = []) {
         }
       },
     }),
+    new DynamicTool({
+      name: "add_to_cart",
+      description: `Thêm sản phẩm vào giỏ hàng của người dùng.
+        Input phải là JSON object với các field:
+        - name: Tên sản phẩm
+        - size: Kích thước sản phẩm
+        - quantity: Số lượng sản phẩm`,
+      func: async(input) => {
+        try {
+          const { name, size, quantity } = JSON.parse(input)
+          // Gọi tool gốc
+          const result = await addToCartTool({ name: name, size: size, quantity: quantity });
+          return JSON.stringify(result);
+        } catch (err) {
+          return JSON.stringify({
+              error: "Invalid input format",
+              detail: err.message,
+          });
+        }
+      }
+    }),
+    new DynamicTool({
+      name: "check_orders",
+      description: `Kiểm tra trạng thái đơn hàng của người dùng theo từng ngày.
+      Input phải là JSON object:
+      - date: ngày muốn kiểm tra có dạng YYYY-MM-DD.`,
+      func: async (input) => {
+        try{
+          let finalInput;
+          
+          if (typeof input === 'string') {
+            const parsed = JSON.parse(input);
+            console.log("📦 First parse result:", parsed);
+            
+            // LangChain wraps input in {"input": "..."} format
+            if (parsed.input) {
+              finalInput = typeof parsed.input === 'string' ? JSON.parse(parsed.input) : parsed.input;
+            } else {
+              finalInput = parsed;
+            }
+          } else {
+            finalInput = input;
+          }
+          const result = await checkOrdersTool(finalInput);
+          return JSON.stringify(result)
+        } catch (err) {
+          return JSON.stringify({
+              error: "Invalid input format",
+              detail: err.message,
+          });
+        }
+      }
+    })
     // TODO: addToCart, cancelOrder, placeOrder, checkOrderStatus...
   ];
 
@@ -131,7 +186,7 @@ async function runAgent(query, messages = []) {
   // console.log("Expected input variables:", executor.agent.llmChain.prompt.inputVariables);
 
   // Ghép tin nhắn lịch sử thành context cho agent
-  const chat_history = messages.map(m => `${m.role}: ${m.content}`).join("\n");
+  // const chat_history = messages.map(m => `${m.role}: ${m.content}`).join("\n");
 
   const result = await executor.invoke({
     input: query,

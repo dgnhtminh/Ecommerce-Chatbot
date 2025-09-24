@@ -19,7 +19,7 @@ async function router(userInput) {
   const humanMsg = new HumanMessage(`
     **Đây là truy vấn của người dùng:** ${userInput}
 
-    Bạn cần phân loại truy vấn vào một trong 3 nhánh:
+    Bạn cần phân loại truy vấn vào một trong 4 nhánh:
 
     **RAG**:
     - Khi khách hàng hỏi thông tin về sản phẩm (mô tả, giá cả, khuyến mãi, so sánh, gợi ý sản phẩm).
@@ -28,13 +28,23 @@ async function router(userInput) {
     - Tư vấn cho tôi vài mẫu áo sơ mi.
     - Áo thun màu đen giá bao nhiêu?
 
+    **SQL**:
+    - Khi khách hàng hỏi truy vấn dữ liệu liên quan đến cấu trúc bảng (giá, min/max, khoảng giá, số lượng, so sánh trực tiếp).
+    Ví dụ:
+    - Sản phẩm nào cho nữ giá khoảng 50-100?
+    - Sản phẩm nào cho nam giá khoảng 100-200?
+    - Sản phẩm nào cho trẻ em giá khoảng 80-150?
+    - Sản phẩm nào đắt nhất?
+    - Cho tôi 5 sản phẩm rẻ nhất.
+    - Áo nào size M giá khoảng 100-200?
+
     **AGENT**:
     - Khi khách hàng yêu cầu thực hiện hành động (kiểm tra tồn kho, thêm giỏ hàng, đặt hàng, hủy đơn hàng, kiểm tra trạng thái đơn hàng).
     Ví dụ:
     - Kiểm tra áo sơ mi còn hàng không?
     - Thêm áo hoodie vào giỏ hàng.
-    - Hủy đơn hàng #12345.
     - Cho tôi đặt 1 chiếc áo thun trắng size L.
+    - Kiểm tra đơn hàng ngày cho tôi.
 
     **CHITCHAT**:
     - Khi khách hàng chào hỏi, nói chuyện phiếm, hoặc hỏi ngoài phạm vi sản phẩm.
@@ -45,7 +55,7 @@ async function router(userInput) {
     - Kể tôi một câu chuyện vui đi.
 
     **Nguyên tắc trả về**:
-    - Chỉ trả về duy nhất một từ: "RAG", "AGENT" hoặc "CHITCHAT".
+    - Chỉ trả về duy nhất một từ: "RAG", "SQL", "AGENT" hoặc "CHITCHAT".
     - Không giải thích thêm.
   `);
 

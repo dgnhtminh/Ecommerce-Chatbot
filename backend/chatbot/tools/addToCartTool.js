@@ -7,7 +7,6 @@ async function addToCartTool({ name, size, quantity }) {
     const embedding = new Embeddings();
 
     try {
-        // ép sang string chắc chắn
         const queryText = typeof name === "string" ? name : JSON.stringify(name);
         console.log("Query: " + queryText)
 
@@ -18,7 +17,7 @@ async function addToCartTool({ name, size, quantity }) {
         const productId = await vectorDB.searchProduct("products", queryEmbedding, 1);
         console.log("Product ID: " + productId)
         if (!productId) {
-        return { success: false, message: "Không tìm thấy sản phẩm trong VectorDB." };
+            return { success: false, message: "Không tìm thấy sản phẩm trong VectorDB." };
         }
 
         // lấy quantity (nếu có trong input JSON)

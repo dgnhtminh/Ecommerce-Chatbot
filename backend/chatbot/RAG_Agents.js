@@ -1,9 +1,10 @@
 const Embeddings = require("./embedding.js");
 const VectorDB = require("./vector_db.js");
 const { getProducts } = require("./mongo_utils.js");
-const { router } = require("./routerChatbot.js"); // router bạn đã viết
+const { router } = require("./routerChatbot.js"); 
 const { initializeAgentExecutorWithOptions } = require("langchain/agents");
 const { ChatOpenAI } = require("@langchain/openai");
+const client = require("./conn_postgre.js");
 const { DynamicTool } = require("@langchain/core/tools");
 const checkStockTool = require("./tools/checkStockTool.js");
 const addToCartTool = require("./tools/addToCartTool.js");
@@ -14,9 +15,10 @@ Xưng em và xưng khách hàng là anh/chị. Nhiệm vụ của bạn là tr�
 Chỉ sử dụng thông tin có trong dữ liệu. Không tự tạo ra thông tin nếu không được cung cấp.
 Nếu không tìm thấy câu trả lời, hãy lịch sự trả lời rằng hiện tại bạn chưa có đủ thông tin để tư vấn chính xác.
 Hãy ưu tiên ngắn gọn, dễ hiểu. Nếu khách hỏi gợi ý sản phẩm, hãy liệt kê một vài mẫu phù hợp và lý do tại sao nên chọn.
-Luôn giữ thái độ lịch sự, chuyên nghiệp và hỗ trợ hết mình.`;
+Luôn giữ thái độ lịch sự, chuyên nghiệp và hỗ trợ hết mình.
+Lưu ý: Tên sản phẩm phải giữ nguyên`;
 
-// ------------------ RAG ------------------
+// RAG 
 async function buildInformation(product) {
   return (
     `Tên sản phẩm: ${product.name || ""}\n` +
@@ -34,7 +36,9 @@ async function initRAG() {
     vectorDB = new VectorDB();
     embedding = new Embeddings();
 
-    const products = await getProducts();
+    const res = await client.query("SELECT * FROM products");
+    const products = res.rows;
+
     for (const product of products) {
       const id = String(product.id);
       const exists = await vectorDB.documentExists("products", { id });
@@ -81,7 +85,71 @@ async function askQuestion(query, messages = []) {
   return response.choices[0].message.content.trim();
 }
 
-// ------------------ AGENT ------------------
+//  SQL 
+async function runSQLQuery(query) {
+  const llm = new ChatOpenAI({
+    model: "gpt-4o-mini",
+    temperature: 0,
+  });
+
+  const systemMsg = {
+    role: "system",
+    content: `
+    Bạn là chuyên gia SQL. Nhiệm vụ: sinh ra câu lệnh SQL phù hợp để chạy trên bảng **products** trong PostgreSQL.
+    Cấu trúc bảng products:
+    - id (INT, PRIMARY KEY)
+    - name (TEXT)
+    - description (TEXT)
+    - category (TEXT)
+    - new_price (NUMERIC)
+    - old_price (NUMERIC)
+    - sizes (TEXT[])
+
+    Lưu ý:
+    - Bảng category là men, women, kid.
+
+    Nguyên tắc:
+    - Chỉ sinh ra **câu lệnh SQL hợp lệ** (không giải thích).
+    - Luôn SELECT, không DROP/DELETE/UPDATE.
+    Ví dụ:
+    - "Sản phẩm đắt nhất" -> SELECT name, new_price FROM products ORDER BY new_price DESC LIMIT 1;
+    - "Giá trung bình áo sơ mi" -> SELECT AVG(new_price) FROM products WHERE category ILIKE '%women%';
+    - "5 sản phẩm rẻ nhất" -> SELECT name, new_price FROM products ORDER BY new_price ASC LIMIT 5;
+    `,
+  };
+
+  const response = await llm.invoke([systemMsg, { role: "user", content: query }]);
+  const sql = response.content.trim();
+  console.log("📝 SQL generated:", sql);
+
+  try {
+    const res = await client.query(sql);
+
+    if (res.rows.length === 0) {
+      return "Em không tìm thấy sản phẩm nào phù hợp với yêu cầu này ạ.";
+    }
+
+    const context = JSON.stringify(res.rows, null, 2);
+
+    const systemContent = systemPrompt + (context ? `\nDữ liệu sản phẩm liên quan:\n${context}` : "");
+
+    const tempMessages = [
+      { role: "system", content: systemContent },
+      { role: "user", content: query },
+    ];
+
+  const chatResponse = await llm.invoke([
+    { role: "system", content: systemContent },
+    { role: "user", content: query },
+  ]);
+
+  return chatResponse.content.trim();
+  } catch (err) {
+    return `❌ SQL query failed\nChi tiết: ${err.message}\nSQL: ${sql}`;
+  }
+}
+
+// Agent
 async function runAgent(query) {
   const llm = new ChatOpenAI({
     modelName: "gpt-4o-mini",
@@ -137,7 +205,7 @@ async function runAgent(query) {
           return JSON.stringify(result);
         } catch (err) {
           return JSON.stringify({
-              error: "Invalid input format",
+               error: "Invalid input format",
               detail: err.message,
           });
         }
@@ -175,7 +243,6 @@ async function runAgent(query) {
         }
       }
     })
-    // TODO: addToCart, cancelOrder, placeOrder, checkOrderStatus...
   ];
 
   const executor = await initializeAgentExecutorWithOptions(tools, llm, {
@@ -197,7 +264,7 @@ async function runAgent(query) {
   return result.output;
 }
 
-// ------------------ CHITCHAT ------------------
+// CHITCHAT 
 async function chitChat(query, messages = []) {
   const llm = new ChatOpenAI({
     modelName: "gpt-4o-mini",
@@ -216,9 +283,12 @@ async function chitChat(query, messages = []) {
 // ------------------ MAIN HANDLER ------------------
 async function handleUserQuery(query, messages = []) {
   const intent = await router(query);
+  console.log("Intent: ", intent);
 
   if (intent === "RAG") {
     return await askQuestion(query, messages);
+  } else if (intent === "SQL") {
+    return await runSQLQuery(query);
   } else if (intent === "AGENT") {
     return await runAgent(query);
   } else {

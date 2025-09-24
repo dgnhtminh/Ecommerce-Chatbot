@@ -3,13 +3,12 @@ const Product = require('../../models/Product');
 
 async function checkOrdersTool(input) {
     try {
-        // Lấy date từ input với nhiều cách khác nhau
+        // Lấy date từ input 
         let date;
         if (input && typeof input === 'object' && input.date) {
             date = input.date;
             console.log("📅 Found date in input.date:", date);
         } else if (typeof input === 'string') {
-            // Nếu input là string, có thể là date trực tiếp
             date = input;
             console.log("📅 Input is string, using as date:", date);
         }

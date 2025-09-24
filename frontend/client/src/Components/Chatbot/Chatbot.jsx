@@ -1,11 +1,22 @@
 import React, { useState } from "react";
 import { FaUser, FaRobot } from "react-icons/fa";
 import "./Chatbot.css";
+import ReactMarkdown from "react-markdown";
+
 
 function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: "assistant", text: "Xin chào! Em là Anie, trợ lý ảo của Fashion! Em có thể giúp gì cho anh/chị hôm nay?" }
+    {
+      role: "assistant",
+      text: `Xin chào! Em là Anie, trợ lý ảo của Fashion!
+
+      Em có thể giúp anh/chị:
+      • Cung cấp thông tin về sản phẩm
+      • Kiểm tra sản phẩm tồn kho
+      • Thêm sản phẩm vào giỏ hàng
+      • Kiểm tra trạng thái đơn hàng theo ngày`
+    }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,7 +25,16 @@ function Chatbot() {
 
   const resetChat = () => {
     setMessages([
-      { role: "assistant", text: "Xin chào! Em là Anie, trợ lý ảo của Fashion! Em có thể giúp gì cho anh/chị hôm nay?" }
+      { 
+        role: "assistant", 
+        text: `Xin chào! Em là Anie, trợ lý ảo của Fashion!
+
+        Em có thể giúp anh/chị:
+        • Cung cấp thông tin về sản phẩm
+        • Kiểm tra sản phẩm tồn kho
+        • Thêm sản phẩm vào giỏ hàng
+        • Kiểm tra trạng thái đơn hàng theo ngày` 
+      }
     ]);
   };
 
@@ -38,7 +58,7 @@ function Chatbot() {
 
       const res = await fetch("http://localhost:4000/api/chatbot", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "auth-token": token
         },
@@ -93,7 +113,7 @@ function Chatbot() {
                 ) : (
                   <FaUser className="chat-icon user-icon" />
                 )}
-                <div className="chat-bubble">{msg.text}</div>
+                <div className="chat-bubble chat-text-format">{msg.text}</div>
               </div>
             ))}
             {loading && (

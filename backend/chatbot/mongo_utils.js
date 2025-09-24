@@ -1,4 +1,3 @@
-// db.js
 const { MongoClient } = require("mongodb");
 const { MONGO_URI, DB_NAME, COLLECTION_NAME } = require("./config.js");
 

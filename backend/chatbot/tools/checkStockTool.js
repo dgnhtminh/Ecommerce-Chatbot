@@ -7,7 +7,6 @@ async function checkStockTool({ input }) {
   const embedding = new Embeddings();
 
   try {
-    // ép sang string chắc chắn
     const queryText = typeof input === "string" ? input : JSON.stringify(input);
     console.log("Query: " + queryText)
 

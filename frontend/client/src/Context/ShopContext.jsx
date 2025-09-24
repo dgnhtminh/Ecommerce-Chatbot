@@ -12,6 +12,34 @@ const ShopContextProvider = (props) => {
         fetchInitialData();
     }, []);
 
+    // ✅ Hàm fetch lại giỏ hàng từ backend
+    const fetchCart = async (products) => {
+        try {
+            if (!localStorage.getItem("auth-token")) return;
+            const resCart = await fetch("http://localhost:4000/api/cart/getcart", {
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    "auth-token": `${localStorage.getItem("auth-token")}`,
+                    "Content-Type": "application/json",
+                },
+                body: "",
+            });
+            const cartData = await resCart.json();
+
+            const filteredCart = {};
+            for (const key in cartData) {
+                const [id] = key.split("_");
+                if (products.some((p) => p.id === Number(id)) && cartData[key] > 0) {
+                    filteredCart[key] = cartData[key];
+                }
+            }
+            setCartItems(filteredCart);
+        } catch (err) {
+            console.error("Lỗi khi fetch giỏ hàng:", err);
+        }
+    };
+
     const fetchInitialData = async () => {
         try {
             let page = 1;
@@ -19,7 +47,9 @@ const ShopContextProvider = (props) => {
             let totalPages = 1;
 
             do {
-                const res = await fetch(`http://localhost:4000/api/products/allproducts?page=${page}&limit=100`);
+                const res = await fetch(
+                    `http://localhost:4000/api/products/allproducts?page=${page}&limit=100`
+                );
                 const data = await res.json();
                 allProducts = [...allProducts, ...data.products];
                 totalPages = data.totalPages || 1;
@@ -28,40 +58,22 @@ const ShopContextProvider = (props) => {
 
             setAll_Product(allProducts);
 
-            if (localStorage.getItem('auth-token')) {
-                const resCart = await fetch('http://localhost:4000/api/cart/getcart', {
-                    method: 'POST',
-                    headers: {
-                        Accept: 'application/json',
-                        'auth-token': `${localStorage.getItem('auth-token')}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: "",
-                });
-                const cartData = await resCart.json();
-
-                const filteredCart = {};
-                for (const key in cartData) {
-                    const [id] = key.split('_');
-                    if (allProducts.some(p => p.id === Number(id)) && cartData[key] > 0) {
-                        filteredCart[key] = cartData[key];
-                    }
-                }
-                setCartItems(filteredCart);
-            }
+            // ✅ fetch giỏ hàng khi có token
+            await fetchCart(allProducts);
 
             setIsLoading(false);
         } catch (err) {
-            console.error('Lỗi khi fetch dữ liệu:', err);
+            console.error("Lỗi khi fetch dữ liệu:", err);
             setIsLoading(false);
         }
     };
 
-
     const fetchProductsByCategory = async (category) => {
         try {
             setIsLoading(true);
-            const res = await fetch(`http://localhost:4000/api/products/category/${category}`);
+            const res = await fetch(
+                `http://localhost:4000/api/products/category/${category}`
+            );
             const data = await res.json();
             setAll_Product(data);
             setIsLoading(false);
@@ -71,33 +83,37 @@ const ShopContextProvider = (props) => {
         }
     };
 
-    const addToCart = (productId, size, quantity) => {
+    const addToCart = async (productId, size, quantity) => {
         const key = `${productId}_${size}`;
 
-        setCartItems(prev => ({
+        setCartItems((prev) => ({
             ...prev,
-            [key]: (prev[key] || 0) + quantity
+            [key]: (prev[key] || 0) + quantity,
         }));
 
-        if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:4000/api/cart/addtocart', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'auth-token': `${localStorage.getItem('auth-token')}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ itemId: key, quantity })  
-            })
-                .then(res => res.json())
-                .then(data => console.log(data));
+        if (localStorage.getItem("auth-token")) {
+            try {
+                await fetch("http://localhost:4000/api/cart/addtocart", {
+                    method: "POST",
+                    headers: {
+                        Accept: "application/json",
+                        "auth-token": `${localStorage.getItem("auth-token")}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ itemId: key, quantity }),
+                });
+
+                // ✅ fetch lại giỏ hàng từ server để đồng bộ
+                await fetchCart(all_product);
+            } catch (err) {
+                console.error("Lỗi khi thêm giỏ hàng:", err);
+            }
         }
     };
 
-
-    const removeFromCart = (productId, size) => {
+    const removeFromCart = async (productId, size) => {
         const key = `${productId}_${size}`;
-        setCartItems(prev => {
+        setCartItems((prev) => {
             const updated = { ...prev };
             if (updated[key]) {
                 updated[key]--;
@@ -106,44 +122,58 @@ const ShopContextProvider = (props) => {
             return updated;
         });
 
-        if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:4000/api/cart/removefromcart', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'auth-token': `${localStorage.getItem('auth-token')}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ itemId: key })
-            }).then(res => res.json()).then(data => console.log(data));
+        if (localStorage.getItem("auth-token")) {
+            try {
+                await fetch("http://localhost:4000/api/cart/removefromcart", {
+                    method: "POST",
+                    headers: {
+                        Accept: "application/json",
+                        "auth-token": `${localStorage.getItem("auth-token")}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ itemId: key }),
+                });
+
+                // ✅ fetch lại giỏ hàng
+                await fetchCart(all_product);
+            } catch (err) {
+                console.error("Lỗi khi xóa giỏ hàng:", err);
+            }
         }
     };
 
-    const clearCart = () => {
+    const clearCart = async () => {
         setCartItems({});
-        if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:4000/api/cart/clearcart', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'auth-token': `${localStorage.getItem('auth-token')}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({})
-            })
-                .then(res => res.json())
-                .then(data => console.log('Cart cleared on server:', data))
-                .catch(err => console.error('Error clearing cart on server:', err));
+        if (localStorage.getItem("auth-token")) {
+            try {
+                await fetch("http://localhost:4000/api/cart/clearcart", {
+                    method: "POST",
+                    headers: {
+                        Accept: "application/json",
+                        "auth-token": `${localStorage.getItem("auth-token")}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({}),
+                });
+
+                // ✅ fetch lại giỏ hàng trống
+                await fetchCart(all_product);
+            } catch (err) {
+                console.error("Error clearing cart on server:", err);
+            }
         }
     };
 
     const applyCoupon = async (code) => {
         try {
-            const res = await fetch('http://localhost:4000/api/coupon/validate-coupon', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code }),
-            });
+            const res = await fetch(
+                "http://localhost:4000/api/coupon/validate-coupon",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code }),
+                }
+            );
 
             const data = await res.json();
             if (data.success) {
@@ -154,16 +184,16 @@ const ShopContextProvider = (props) => {
                 alert(data.message);
             }
         } catch (err) {
-            console.error('Lỗi khi áp dụng mã:', err);
-            alert('Đã xảy ra lỗi, vui lòng thử lại sau');
+            console.error("Lỗi khi áp dụng mã:", err);
+            alert("Đã xảy ra lỗi, vui lòng thử lại sau");
         }
     };
 
     const getTotalCartAmount = () => {
         let total = 0;
         for (const key in cartItems) {
-            const [id] = key.split('_');
-            const product = all_product.find(p => p.id === Number(id));
+            const [id] = key.split("_");
+            const product = all_product.find((p) => p.id === Number(id));
             if (product) {
                 total += product.new_price * cartItems[key];
             }
@@ -187,7 +217,8 @@ const ShopContextProvider = (props) => {
         applyCoupon,
         clearCart,
         isLoading,
-        fetchProductsByCategory 
+        fetchProductsByCategory,
+        fetchCart, // ✅ export luôn để chỗ khác có thể gọi lại khi cần
     };
 
     return (

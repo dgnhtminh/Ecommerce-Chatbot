@@ -164,3 +164,8 @@
 .chatbot-input button:hover {
   background: #0056b3;
 }
+
+/* Thêm vào file Chatbot.css */
+.chat-text-format {
+  white-space: pre-line;
+}
